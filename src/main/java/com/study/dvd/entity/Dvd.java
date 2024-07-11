@@ -11,7 +11,7 @@ public class Dvd {
 	private int dvdId;
 	private String registrationNumber;
 	private String title;
-	private int produverId;
+	private int producerId;
 	private String producerName;
 	private int publisherId;
 	private String publisherName;
