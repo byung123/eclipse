@@ -3,6 +3,7 @@ package com.study.dvd.dao;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,7 +11,7 @@ import com.study.dvd.entity.Producer;
 import com.study.dvd.util.DBConnectionMgr;
 
 public class ProducerDao {
-private static DBConnectionMgr pool = DBConnectionMgr.getInstance();
+	private static DBConnectionMgr pool = DBConnectionMgr.getInstance();
 	
 	public static List<Producer> searchProducerByProducerName(String searchText) {
 		List<Producer> producers = new ArrayList<>();
@@ -24,7 +25,7 @@ private static DBConnectionMgr pool = DBConnectionMgr.getInstance();
 			sql.append("select * from dvd_view ");
 			sql.append("where producer_name like ? limit 0, 50");
 			pstmt = con.prepareStatement(sql.toString());
-			pstmt.setString(1, "%" + searchText + "%");
+			pstmt.setString(1, "%" + searchText + "%"); // 첫번째 물음표에 이 문장을 넣겠다
 			rs = pstmt.executeQuery();
 			
 			while(rs.next()) {
@@ -45,4 +46,38 @@ private static DBConnectionMgr pool = DBConnectionMgr.getInstance();
 		
 		return producers;
 	}
+	
+	public static int save(Producer producer) {
+		int successCount = 0;
+		Connection con = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		
+		try {
+			con = pool.getConnection();
+			String sql = "insert into producer_tb value(0, ?)";
+			// 무조건 Statement는 java의 sql로 받아와야 함
+			pstmt = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+			pstmt.setString(1, producer.getProducerName());
+			successCount = pstmt.executeUpdate();
+			rs = pstmt.getGeneratedKeys();
+			while(rs.next()) {
+				producer.setProducerId(rs.getInt(1));
+			}
+					
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			pool.freeConnection(con, pstmt, rs);
+		}
+		
+		return successCount;
+	}
 }
+
+
+
+
+
+
+
